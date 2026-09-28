@@ -25,4 +25,12 @@ for name in ('results','summary'):
     if not (root/'reports'/name/'index.html').is_file():
         raise SystemExit('Missing HTML report')
 print(json.dumps(summary,indent=2))
-print('Sample counts, matching listener data, and both HTML reports verified.')
+if failures == len(rows):
+    raise SystemExit('REJECTED: every request failed. Reports exist, but this is not a usable submission run.')
+if expected == 10 and failures:
+    raise SystemExit('SMOKE TEST FAILED: all 10 requests must pass before stress testing.')
+report = '# Results for this packaged run\n\nRun: ' + root.name + '\n\n' + json.dumps(summary, indent=2) + '\n\nAll sample counts and both reports verified. Stress errors are retained unchanged.\n'
+(root/'RUN-RESULTS.md').write_text(report)
+print('Validated: sample counts, matching data, both HTML reports, and successful API responses.')
+if failures:
+    print(f'STRESS ERRORS RETAINED: {failures} failed samples. Review the dashboard before submitting.')

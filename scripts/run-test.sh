@@ -3,6 +3,9 @@ set -euo pipefail
 cd "$(dirname "$0")/.."
 mode="${1:-smoke}"
 case "$mode" in smoke) users=5;; stress) users=10000;; *) echo "Usage: $0 smoke|stress"; exit 2;; esac
+mkdir -p .runtime
+docker exec assignment46-mongo mongosh --quiet --eval 'quit(db.adminCommand({ping:1}).ok ? 0 : 1)' >/dev/null
+python3 scripts/check-app.py
 out="$PWD/runs/${mode}-$(date -u +%Y%m%dT%H%M%SZ)"
 mkdir -p "$out"
 cp tests/stress-test.jmx "$out/stress-test.jmx"

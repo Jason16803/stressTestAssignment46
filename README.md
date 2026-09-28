@@ -12,6 +12,14 @@ bash scripts/start-app.sh
 
 MongoDB 7 runs in the assignment46-mongo Docker container, bound to 127.0.0.1:27017. The application runs on port 3000. Its output is in .runtime/app.log. The launcher selects IPv4 first so the instructor's localhost database URL works with the Docker binding. The default Java installation is unchanged; scripts/jmeter.sh selects OpenJDK 17.
 
+## Restart and recording checks
+
+After a Codespace restart, run scripts/start-app.sh and wait for its READY message. This performs a live MongoDB ping and a real HTTP 201 test using synthetic data. Old logs are archived at startup; they are not proof of readiness. A stale saved process ID is no longer trusted.
+
+For the specific Docker RWLayer unexpectedly nil error, startup preserves the broken container under a timestamped name and creates its replacement using the preserved container's database volumes. No old container or volume is deleted. Other Docker failures stop startup for inspection.
+
+If startup or smoke testing fails, stop the recording workflow and fix the issue before stress testing. The test runner now refuses to run when MongoDB or the API is unavailable. Smoke tests require zero errors, and packaging rejects all-failed runs. Partial stress failures remain visible and are not filtered.
+
 ## Run and generate both reports
 
 ```bash
@@ -30,7 +38,7 @@ The body uses synthetic strings only: ccNumber TEST-ONLY-0000, expiration 12/203
 
 Each run gets a fresh UTC-stamped directory under runs/. JMeter executes in non-GUI mode, writes results.jtl and jmeter.log, then generates reports/results/ and reports/summary/ from the two listener CSV files. No old run is overwritten. The two reports describe the same run and should contain the same samples.
 
-scripts/check-results.py checks the expected sample count, matches the core sample fields across all three data files without relying on concurrent write order, verifies both report entrypoints, and writes metrics.json. Application errors are reported, not hidden.
+scripts/check-results.py checks the expected sample count, matches the core sample fields across all three data files without relying on concurrent write order, verifies both report entrypoints, and writes metrics.json and RUN-RESULTS.md. The package uses that run-specific summary as RESULTS.md, rather than copying historical results. Application errors are reported, not hidden.
 
 ## Cloud measurement limits
 

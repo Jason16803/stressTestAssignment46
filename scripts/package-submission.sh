@@ -15,7 +15,8 @@ if dest.exists():
 shutil.copytree(run,dest)
 for folder in ('scripts','tests','app'):
     shutil.copytree(folder,dest/folder,ignore=shutil.ignore_patterns('node_modules'))
-for file in ('README.md','RESULTS.md'):
+shutil.copy2(run/'RUN-RESULTS.md',dest/'RESULTS.md')
+for file in ('README.md',):
     if Path(file).exists(): shutil.copy2(file,dest/file)
 archive=shutil.make_archive(str(dest),'zip',dest.parent,dest.name)
 with zipfile.ZipFile(archive) as z:
